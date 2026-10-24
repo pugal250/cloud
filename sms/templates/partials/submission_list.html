@@ -1,0 +1,26 @@
+{# Student-facing list of own submissions. Needs: items, kind ('certificates'|'completions'|'leaves') #}
+{% from '_macros.html' import badge, empty, review_info %}
+{% if items %}
+<ul class="submissions">
+  {% for it in items %}
+  <li class="submission">
+    <div class="submission-head">
+      <strong>
+        {% if kind == 'certificates' %}{{ it.title }}
+        {% elif kind == 'completions' %}{{ it.course_name or 'Course' }}
+        {% else %}{{ it.start_date|d }} – {{ it.end_date|d }}{% endif %}
+      </strong>
+      {{ badge(it.status) }}
+    </div>
+    <p class="muted">
+      {% if kind == 'certificates' %}{% if it.issuer %}{{ it.issuer }} · {% endif %}{% if it.issued_on %}Issued {{ it.issued_on|d }} · {% endif %}
+      {% elif kind == 'completions' %}Completed {{ it.completed_on|d }} · {% endif %}
+      Submitted {{ it.created_at|d }}
+    </p>
+    {% if kind == 'completions' %}<p>{{ it.details }}</p>{% elif kind == 'leaves' %}<p>{{ it.reason }}</p>{% endif %}
+    {% if kind != 'leaves' %}<p><a href="{{ url_for('files.download', kind=kind, item_id=it.id) }}" target="_blank" rel="noopener"><i class="bi bi-paperclip" aria-hidden="true"></i> {{ it.original_filename }}</a></p>{% endif %}
+    {{ review_info(it) }}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}{{ empty('inbox', 'Nothing submitted yet', 'Your submissions and their review status will be listed here.') }}{% endif %}

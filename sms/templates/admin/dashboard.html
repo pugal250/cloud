@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pct_chip, empty %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Admin dashboard</h1></div>
+
+<div class="grid grid-4">
+  <a class="stat stat-link" href="{{ url_for('admin.students') }}"><span class="stat-label">Students</span><span class="stat-value">{{ counts.students }}</span></a>
+  <a class="stat stat-link" href="{{ url_for('admin.staff_list') }}"><span class="stat-label">Staff</span><span class="stat-value">{{ counts.staff }}</span></a>
+  <a class="stat stat-link" href="{{ url_for('admin.courses') }}"><span class="stat-label">Courses</span><span class="stat-value">{{ counts.courses }}</span></a>
+  <div class="stat"><span class="stat-label">Pending reviews</span><span class="stat-value">{{ pending.total }}</span>
+    <small class="muted">{{ pending.certificates }} certificates · {{ pending.completions }} completions · {{ pending.leaves }} leave</small></div>
+</div>
+
+<section class="card" aria-labelledby="alerts-h">
+  <div class="card-head"><h2 id="alerts-h"><i class="bi bi-exclamation-triangle-fill warn" aria-hidden="true"></i> Low attendance alerts</h2>
+    <a href="{{ url_for('admin.courses') }}">Threshold: {{ threshold|num }}%</a></div>
+  {% if alerts %}
+  <div class="alert alert-warning" role="alert"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+    <span>{{ alerts|length }} student{{ 's' if alerts|length != 1 }} below {{ threshold|num }}% attendance.</span></div>
+  <div class="table-wrap">
+    <table>
+      <caption class="sr-only">Students with attendance below the threshold</caption>
+      <thead><tr><th scope="col">Student</th><th scope="col">ID</th><th scope="col">Course</th><th scope="col">Attendance</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>{% for s in alerts %}
+        <tr><td data-label="Student">{{ s.full_name }}</td><td data-label="ID">{{ s.student_code }}</td><td data-label="Course">{{ s.course_name or '-' }}</td>
+          <td data-label="Attendance">{{ pct_chip(s.attendance_pct, threshold) }}</td>
+          <td><a class="btn btn-sm btn-outline" href="{{ url_for('admin.student_view', student_id=s.id) }}">View<span class="sr-only"> {{ s.full_name }}</span></a></td></tr>
+      {% endfor %}</tbody>
+    </table>
+  </div>
+  {% else %}{{ empty('emoji-smile', 'No low attendance alerts', 'Every student with attendance data is at or above ' ~ (threshold|num) ~ '%.') }}{% endif %}
+</section>
+{% endblock %}

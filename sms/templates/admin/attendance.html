@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pct_chip, empty %}
+{% block title %}Attendance & marks{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Attendance &amp; marks</h1></div>
+<section class="card">
+  <form class="toolbar wrap" method="get" role="search">
+    <label class="sr-only" for="q">Search students</label>
+    <input id="q" name="q" type="search" value="{{ q }}" placeholder="Search name, ID or email">
+    <label class="sr-only" for="course">Course</label>
+    <select id="course" name="course"><option value="">All courses</option>
+      {% for c in courses %}<option value="{{ c.id }}" {{ 'selected' if course_id == c.id }}>{{ c.name }}</option>{% endfor %}</select>
+    <label class="check"><input type="checkbox" name="low" value="1" {{ 'checked' if low }}> Below {{ threshold|num }}% only</label>
+    <button class="btn btn-outline" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Filter</button>
+    {% if q or course_id or low %}<a class="btn btn-ghost-dark" href="{{ url_for('admin.attendance') }}">Clear</a>{% endif %}
+  </form>
+  {% if students %}
+  <div class="table-wrap"><table>
+    <caption class="sr-only">Attendance and marks by student</caption>
+    <thead><tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Course</th><th scope="col" class="num">Attended</th><th scope="col">Attendance</th><th scope="col" class="num">Marks</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody>{% for s in students %}
+      <tr><td data-label="ID">{{ s.student_code }}</td><td data-label="Name">{{ s.full_name }}</td><td data-label="Course">{{ s.course_name or '-' }}</td>
+        <td class="num" data-label="Attended">{{ s.attended }} / {{ s.total_classes }}</td>
+        <td data-label="Attendance">{{ pct_chip(s.attendance_pct, threshold) }}</td><td class="num" data-label="Marks">{{ s.marks_pct|pct }}</td>
+        <td><a class="btn btn-sm btn-outline" href="{{ url_for('admin.student_view', student_id=s.id) }}">Details<span class="sr-only"> for {{ s.full_name }}</span></a></td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{{ empty('clipboard-data', 'No matching students', 'Adjust the filters to see results.') }}{% endif %}
+</section>
+{% endblock %}

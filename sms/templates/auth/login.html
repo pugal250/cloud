@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}Sign in{% endblock %}
+{% block bare %}
+<div class="login">
+  <section class="login-side" aria-hidden="true">
+    <i class="bi bi-mortarboard"></i>
+    <h2>Student Management</h2>
+    <p>Attendance, marks, certificates and leave — in one place for students, staff and administrators.</p>
+  </section>
+  <main id="main" class="login-main" tabindex="-1">
+    <div class="login-card">
+      <h1>Sign in</h1>
+      <p class="muted">Use the username and password given to you by your school.</p>
+      {% include 'partials/flash.html' %}
+      <form method="post" action="{{ url_for('auth.login') }}" novalidate>
+        {{ csrf() }}
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" value="{{ username }}" required autocomplete="username" autofocus maxlength="60">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password" maxlength="128">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-shield-lock" aria-hidden="true"></i> Sign in</button>
+      </form>
+    </div>
+  </main>
+</div>
+{% endblock %}

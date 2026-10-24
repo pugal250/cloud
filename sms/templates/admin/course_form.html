@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, textarea %}
+{% block title %}{{ 'Edit course' if course else 'Add course' }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ 'Edit ' ~ course.name if course else 'Add course' }}</h1></div>
+<form class="card" method="post" novalidate>
+  {{ csrf() }}
+  <div class="form-row">
+    {{ field('code', 'Course code', form, maxlength=20) }}
+    {{ field('name', 'Course name', form, maxlength=120) }}
+  </div>
+  {{ textarea('description', 'Description', form, required=false, rows=3) }}
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if course else 'Add course' }}</button>
+    <a class="btn btn-outline" href="{{ url_for('admin.courses') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

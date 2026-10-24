@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, file_input %}
+{% block title %}My certificates{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Certificates</h1></div>
+<div class="grid grid-2 align-start">
+  <section class="card" aria-labelledby="up-h">
+    <div class="card-head"><h2 id="up-h">Upload a certificate</h2></div>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {{ csrf() }}
+      {{ field('title', 'Certificate title', form, maxlength=120) }}
+      {{ field('issuer', 'Issuing organisation', form, required=false, maxlength=120) }}
+      {{ field('issued_on', 'Issue date', form, type='date', required=false, max=today) }}
+      {{ file_input('file', 'Certificate file', form) }}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Upload for review</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="my-h">
+    <div class="card-head"><h2 id="my-h">My submissions</h2></div>
+    {% set kind = 'certificates' %}{% include 'partials/submission_list.html' %}
+  </section>
+</div>
+{% endblock %}

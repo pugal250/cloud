@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, pct_chip, empty %}
+{% block title %}Staff dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Staff dashboard</h1></div>
+
+<div class="grid grid-4">
+  <div class="stat"><span class="stat-label">Assigned students</span><span class="stat-value">{{ students|length }}</span></div>
+  {% for kind, meta in kinds.items() %}
+  <a class="stat stat-link" href="{{ url_for('staff.reviews', kind=kind) }}"><span class="stat-label">Pending {{ meta.label|lower }}</span><span class="stat-value">{{ pending[kind] }}</span></a>
+  {% endfor %}
+</div>
+
+<section class="card" aria-labelledby="stu-h">
+  <div class="card-head"><h2 id="stu-h">My students</h2>
+    <form class="toolbar" method="get" role="search">
+      <label class="sr-only" for="q">Search students</label>
+      <input id="q" name="q" type="search" value="{{ q }}" placeholder="Search name, ID or email">
+      <button class="btn btn-outline" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+      {% if q %}<a class="btn btn-ghost-dark" href="{{ url_for('staff.dashboard') }}">Clear</a>{% endif %}
+    </form>
+  </div>
+  {% if students %}
+  <div class="table-wrap">
+    <table>
+      <caption class="sr-only">Students assigned to you</caption>
+      <thead><tr><th scope="col">Student</th><th scope="col">ID</th><th scope="col">Course</th><th scope="col">Attendance</th><th scope="col">Marks</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>
+      {% for s in students %}
+        <tr><td data-label="Student">{{ s.full_name }}</td><td data-label="ID">{{ s.student_code }}</td><td data-label="Course">{{ s.course_name or '-' }}</td>
+          <td data-label="Attendance">{{ pct_chip(s.attendance_pct, threshold) }}</td><td data-label="Marks">{{ s.marks_pct|pct }}</td>
+          <td><a class="btn btn-sm btn-outline" href="{{ url_for('staff.student_detail', student_id=s.id) }}">View<span class="sr-only"> {{ s.full_name }}</span></a></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}{{ empty('people', 'No students found', 'Students assigned to you by an administrator will appear here.' if not q else 'Try a different search.') }}{% endif %}
+</section>
+
+<div class="grid grid-3">
+  {% for kind, meta in kinds.items() %}
+  <section class="card" aria-label="Pending {{ meta.label }}">
+    <div class="card-head"><h2>Pending {{ meta.label|lower }}</h2><a href="{{ url_for('staff.reviews', kind=kind) }}">Review</a></div>
+    {% if pending_items[kind] %}
+    <ul class="plain">{% for it in pending_items[kind] %}<li><span>{{ it.student_name }}<small class="muted block">
+      {% if kind == 'certificates' %}{{ it.title }}{% elif kind == 'completions' %}{{ it.course_name }}{% else %}{{ it.start_date|d }} – {{ it.end_date|d }}{% endif %}</small></span>{{ badge('pending') }}</li>{% endfor %}</ul>
+    {% else %}{{ empty('check2-circle', 'All caught up') }}{% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

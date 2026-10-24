@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import empty %}
+{% block title %}Staff{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Staff accounts</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin.staff_new') }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add staff</a></div>
+<section class="card">
+  <form class="toolbar" method="get" role="search">
+    <label class="sr-only" for="q">Search staff</label>
+    <input id="q" name="q" type="search" value="{{ q }}" placeholder="Search name, ID or email">
+    <button class="btn btn-outline" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+    {% if q %}<a class="btn btn-ghost-dark" href="{{ url_for('admin.staff_list') }}">Clear</a>{% endif %}
+  </form>
+  {% if staff %}
+  <div class="table-wrap"><table>
+    <caption class="sr-only">Staff accounts</caption>
+    <thead><tr><th scope="col">Employee ID</th><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Students</th><th scope="col">Account</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody>{% for m in staff %}
+      <tr><td data-label="Employee ID">{{ m.employee_code }}</td><td data-label="Name">{{ m.full_name }}<small class="muted block">{{ m.email }}</small></td>
+        <td data-label="Department">{{ m.department or '-' }}</td><td data-label="Students">{{ m.student_count }}</td>
+        <td data-label="Account"><span class="badge {{ 'badge-approved' if m.is_active else 'badge-muted' }}">{{ 'Active' if m.is_active else 'Disabled' }}</span></td>
+        <td class="row-actions">
+          <a class="btn btn-sm btn-outline" href="{{ url_for('admin.staff_edit', staff_id=m.id) }}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Edit<span class="sr-only"> {{ m.full_name }}</span></a>
+          <a class="btn btn-sm btn-danger-outline" href="{{ url_for('admin.staff_delete', staff_id=m.id) }}"><i class="bi bi-trash" aria-hidden="true"></i> Delete<span class="sr-only"> {{ m.full_name }}</span></a>
+        </td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{{ empty('person-badge', 'No staff accounts found', 'Create one to start assigning students.') }}{% endif %}
+</section>
+{% endblock %}

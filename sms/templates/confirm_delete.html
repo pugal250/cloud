@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<div class="card confirm">
+  <h1><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> {{ heading }}</h1>
+  <p>You are about to permanently delete <strong>{{ subject }}</strong>.</p>
+  <ul>{% for c in consequences %}<li>{{ c }}</li>{% endfor %}</ul>
+  <form method="post" class="actions">
+    {{ csrf() }}
+    <button class="btn btn-danger" type="submit"><i class="bi bi-trash" aria-hidden="true"></i> Yes, delete permanently</button>
+    <a class="btn btn-outline" href="{{ cancel_url }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

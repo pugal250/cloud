@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, badge, empty, review_info %}
+{% block title %}{{ meta.label }} review{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ meta.label }}</h1></div>
+
+<div class="toolbar-row">
+  <nav aria-label="Filter by status" class="tabs">
+    {% for s in ['pending', 'approved', 'rejected', 'all'] %}
+    <a href="{{ url_for('staff.reviews', kind=kind, status=s, q=q or None) }}" class="{{ 'active' if s == status }}" {% if s == status %}aria-current="true"{% endif %}>
+      {{ s|capitalize }}{% if s == 'pending' and pending[kind] %} <span class="count">{{ pending[kind] }}</span>{% endif %}</a>
+    {% endfor %}
+  </nav>
+  <form class="toolbar" method="get" role="search">
+    <input type="hidden" name="status" value="{{ status }}">
+    <label class="sr-only" for="q">Search by student</label>
+    <input id="q" name="q" type="search" value="{{ q }}" placeholder="Student name or ID">
+    <button class="btn btn-outline" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+  </form>
+</div>
+
+{% if items %}
+<ul class="submissions cards">
+  {% for it in items %}
+  <li class="card submission">
+    <div class="submission-head">
+      <div><strong>{{ it.student_name }}</strong> <span class="muted">{{ it.student_code }}</span></div>{{ badge(it.status) }}
+    </div>
+    {% if kind == 'certificates' %}
+      <p><strong>{{ it.title }}</strong>{% if it.issuer %} — {{ it.issuer }}{% endif %}{% if it.issued_on %} · issued {{ it.issued_on|d }}{% endif %}</p>
+    {% elif kind == 'completions' %}
+      <p><strong>{{ it.course_name }}</strong> · completed {{ it.completed_on|d }}</p><p>{{ it.details }}</p>
+    {% else %}
+      <p><strong>{{ it.start_date|d }} – {{ it.end_date|d }}</strong></p><p>{{ it.reason }}</p>
+    {% endif %}
+    {% if kind != 'leaves' %}<p><a href="{{ url_for('files.download', kind=kind, item_id=it.id) }}" target="_blank" rel="noopener"><i class="bi bi-paperclip" aria-hidden="true"></i> {{ it.original_filename }}</a></p>{% endif %}
+    <p class="muted">Submitted {{ it.created_at|d }}</p>
+    {% if it.status == 'pending' %}
+    <form method="post" action="{{ url_for('staff.review', kind=kind, item_id=it.id) }}" class="review-form">
+      {{ csrf() }}
+      <input type="hidden" name="return_status" value="{{ status }}">
+      <div class="field"><label for="note-{{ it.id }}">Review note <span class="req" aria-hidden="true">*</span></label>
+        <textarea id="note-{{ it.id }}" name="note" rows="2" maxlength="500" required minlength="3"></textarea></div>
+      <div class="actions">
+        <button class="btn btn-approve" type="submit" name="decision" value="approved"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Approve</button>
+        <button class="btn btn-danger" type="submit" name="decision" value="rejected"><i class="bi bi-x-circle-fill" aria-hidden="true"></i> Reject</button>
+      </div>
+    </form>
+    {% else %}{{ review_info(it) }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}<div class="card">{{ empty('inbox', 'Nothing to show', 'No ' ~ meta.label|lower ~ ' match this filter.') }}</div>{% endif %}
+{% endblock %}

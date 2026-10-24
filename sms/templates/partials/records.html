@@ -1,0 +1,37 @@
+{# Attendance + marks cards. Needs: student, threshold, breakdown, attendance, marks #}
+{% from '_macros.html' import badge, pct_chip, empty %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="att-h">
+    <div class="card-head"><h2 id="att-h">Attendance</h2>{{ pct_chip(student.attendance_pct, threshold) }}</div>
+    {% if student.total_classes %}
+    <p class="muted">{{ student.attended }} of {{ student.total_classes }} counted classes attended (present + late; excused days are not counted). Alert threshold: {{ threshold|num }}%.</p>
+    <progress class="meter {{ 'meter-low' if is_low(student, threshold) }}" max="100" value="{{ student.attendance_pct }}" aria-label="Attendance percentage">{{ student.attendance_pct }}%</progress>
+    <ul class="chips" aria-label="Attendance breakdown">
+      <li>Present <strong>{{ breakdown.present }}</strong></li><li>Late <strong>{{ breakdown.late }}</strong></li>
+      <li>Absent <strong>{{ breakdown.absent }}</strong></li><li>Excused <strong>{{ breakdown.excused }}</strong></li>
+    </ul>
+    <div class="table-wrap scroll-y">
+      <table>
+        <caption class="sr-only">Attendance records, newest first</caption>
+        <thead><tr><th scope="col">Date</th><th scope="col">Status</th></tr></thead>
+        <tbody>{% for a in attendance %}<tr><td>{{ a.attendance_date|d }}</td><td>{{ badge(a.status) }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% else %}{{ empty('calendar-check', 'No attendance recorded yet', 'Records will appear here once staff mark attendance.') }}{% endif %}
+  </section>
+
+  <section class="card" aria-labelledby="marks-h">
+    <div class="card-head"><h2 id="marks-h">Marks</h2>
+      {% if student.marks_pct is not none %}<span class="badge badge-muted">Overall {{ student.marks_pct|pct }}</span>{% endif %}</div>
+    {% if marks %}
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">Marks</caption>
+        <thead><tr><th scope="col">Assessment</th><th scope="col">Course</th><th scope="col" class="num">Score</th><th scope="col" class="num">%</th></tr></thead>
+        <tbody>{% for m in marks %}<tr><td>{{ m.assessment }}</td><td>{{ m.course_name or '-' }}</td>
+          <td class="num">{{ m.score|num }} / {{ m.max_score|num }}</td><td class="num">{{ m.pct|pct }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    {% else %}{{ empty('journal-text', 'No marks yet', 'Marks will appear here once they are recorded.') }}{% endif %}
+  </section>
+</div>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, textarea %}
+{% block title %}Leave requests{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Leave requests</h1></div>
+<div class="grid grid-2 align-start">
+  <section class="card" aria-labelledby="up-h">
+    <div class="card-head"><h2 id="up-h">Request leave</h2></div>
+    <form method="post" novalidate>
+      {{ csrf() }}
+      <div class="form-row">
+        {{ field('start_date', 'Start date', form, type='date', data_range_start='1') }}
+        {{ field('end_date', 'End date', form, type='date', data_range_end='1') }}
+      </div>
+      {{ textarea('reason', 'Reason', form, hint='5-500 characters.') }}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-send" aria-hidden="true"></i> Submit request</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="my-h">
+    <div class="card-head"><h2 id="my-h">My requests</h2></div>
+    {% set kind = 'leaves' %}{% include 'partials/submission_list.html' %}
+  </section>
+</div>
+{% endblock %}

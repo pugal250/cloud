@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, pct_chip %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><a href="{{ url_for('staff.dashboard') }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> My students</a>
+    <h1>{{ student.full_name }} <small class="muted">{{ student.student_code }}</small></h1></div>
+  {{ pct_chip(student.attendance_pct, threshold) }}
+</div>
+<p class="muted">{{ student.course_name or 'No course' }} · {{ student.email }}{% if student.phone %} · {{ student.phone }}{% endif %}</p>
+
+{% include 'partials/records.html' %}
+
+<div class="grid grid-2 align-start">
+  <section class="card" aria-labelledby="ra-h">
+    <div class="card-head"><h2 id="ra-h">Record attendance</h2></div>
+    <form method="post" action="{{ url_for('staff.record_attendance', student_id=student.id) }}" novalidate>
+      {{ csrf() }}
+      <div class="form-row">
+        {{ field('attendance_date', 'Date', form, type='date', max=today) }}
+        <div class="field"><label for="f-status">Status</label>
+          <select id="f-status" name="status" required>
+            {% for s in ['present', 'late', 'absent', 'excused'] %}<option value="{{ s }}">{{ s|capitalize }}</option>{% endfor %}
+          </select></div>
+      </div>
+      <p class="hint">Saving a date that already has a record replaces it.</p>
+      <button class="btn btn-primary" type="submit">Save attendance</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="rm-h">
+    <div class="card-head"><h2 id="rm-h">Add marks</h2></div>
+    <form method="post" action="{{ url_for('staff.record_marks', student_id=student.id) }}" novalidate>
+      {{ csrf() }}
+      {{ field('assessment', 'Assessment', form, maxlength=80) }}
+      <div class="form-row">
+        {{ field('score', 'Score', form, type='number', min='0', step='0.1') }}
+        {{ field('max_score', 'Out of', form, type='number', min='0.1', step='0.1') }}
+      </div>
+      <button class="btn btn-primary" type="submit">Save marks</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

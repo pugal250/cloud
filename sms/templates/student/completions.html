@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, select, textarea, file_input %}
+{% block title %}Course completion{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Course completion</h1></div>
+<div class="grid grid-2 align-start">
+  <section class="card" aria-labelledby="up-h">
+    <div class="card-head"><h2 id="up-h">Submit completion details</h2></div>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {{ csrf() }}
+      {% set opts = [] %}{% for c in courses %}{% set _ = opts.append((c.id, c.code ~ ' – ' ~ c.name)) %}{% endfor %}
+      {{ select('course_id', 'Course', form, opts, required=true, blank='-- Select a course --') }}
+      {{ field('completed_on', 'Completion date', form, type='date', max=today) }}
+      {{ textarea('details', 'Details', form, hint='Describe what you completed (10-1000 characters).', maxlength=1000) }}
+      {{ file_input('file', 'Completion certificate', form) }}
+      <button class="btn btn-primary" type="submit"><i class="bi bi-send" aria-hidden="true"></i> Submit for review</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="my-h">
+    <div class="card-head"><h2 id="my-h">My submissions</h2></div>
+    {% set kind = 'completions' %}{% include 'partials/submission_list.html' %}
+  </section>
+</div>
+{% endblock %}

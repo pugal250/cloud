@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, pct_chip, empty %}
+{% block title %}My dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Welcome, {{ student.full_name.split(' ')[0] }}</h1></div>
+
+{% if is_low(student, threshold) %}
+<div class="alert alert-warning" role="alert"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+  <span>Your attendance is {{ student.attendance_pct|pct }}, below the required {{ threshold|num }}%.</span></div>
+{% endif %}
+
+<div class="grid grid-4">
+  <div class="stat"><span class="stat-label">Attendance</span><span class="stat-value">{{ student.attendance_pct|pct }}</span></div>
+  <div class="stat"><span class="stat-label">Overall marks</span><span class="stat-value">{{ student.marks_pct|pct }}</span></div>
+  <div class="stat"><span class="stat-label">Course</span><span class="stat-value stat-text">{{ student.course_name or 'Not assigned' }}</span></div>
+  <div class="stat"><span class="stat-label">Course completion</span>
+    <span class="stat-value stat-text">{% if course_completion %}{{ badge(course_completion.status) }}{% else %}<span class="badge badge-muted">Not submitted</span>{% endif %}</span></div>
+</div>
+
+<section class="card" aria-labelledby="profile-h">
+  <div class="card-head"><h2 id="profile-h">My profile</h2></div>
+  <dl class="details">
+    <div><dt>Name</dt><dd>{{ student.full_name }}</dd></div>
+    <div><dt>Student ID</dt><dd>{{ student.student_code }}</dd></div>
+    <div><dt>Username</dt><dd>{{ student.username }}</dd></div>
+    <div><dt>Email</dt><dd>{{ student.email }}</dd></div>
+    <div><dt>Phone</dt><dd>{{ student.phone or '-' }}</dd></div>
+    <div><dt>Date of birth</dt><dd>{{ student.date_of_birth|d }}</dd></div>
+    <div><dt>Enrolled</dt><dd>{{ student.enrolled_on|d }}</dd></div>
+    <div><dt>Mentor</dt><dd>{{ student.staff_name or 'Not assigned' }}</dd></div>
+  </dl>
+</section>
+
+{% include 'partials/records.html' %}
+
+<div class="grid grid-3">
+  {% for title, items, endpoint, kind in [('Certificates', certificates, 'student.certificates', 'certificates'), ('Leave requests', leaves, 'student.leaves', 'leaves')] %}
+  <section class="card" aria-label="{{ title }}">
+    <div class="card-head"><h2>{{ title }}</h2><a href="{{ url_for(endpoint) }}">View all</a></div>
+    {% if items %}<ul class="plain">{% for it in items %}<li><span>{% if kind == 'certificates' %}{{ it.title }}{% else %}{{ it.start_date|d }} – {{ it.end_date|d }}{% endif %}</span>{{ badge(it.status) }}</li>{% endfor %}</ul>
+    {% else %}{{ empty('inbox', 'Nothing yet') }}{% endif %}
+  </section>
+  {% endfor %}
+  <section class="card" aria-label="Course completion">
+    <div class="card-head"><h2>Course completion</h2><a href="{{ url_for('student.completions') }}">Submit / view</a></div>
+    {% if course_completion %}<p>{{ student.course_name }} {{ badge(course_completion.status) }}</p>{% if course_completion.review_note %}<p class="muted">{{ course_completion.review_note }}</p>{% endif %}
+    {% else %}{{ empty('mortarboard', 'No completion submitted', 'Submit your completion certificate when you finish your course.') }}{% endif %}
+  </section>
+</div>
+{% endblock %}

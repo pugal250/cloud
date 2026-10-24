@@ -1,0 +1,11 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+<div class="flashes" aria-live="polite">
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}" role="{{ 'alert' if category in ('danger', 'warning') else 'status' }}">
+    <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' if category in ('danger', 'warning') else 'info-circle-fill' }}" aria-hidden="true"></i>
+    <span>{{ message }}</span>
+    <button type="button" class="alert-close" data-dismiss aria-label="Dismiss message"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+  {% endfor %}
+</div>
+{% endwith %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field %}
+{% block title %}{{ 'Edit staff' if member else 'Add staff' }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ 'Edit ' ~ member.full_name if member else 'Add staff account' }}</h1></div>
+{% if form.errors %}<div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><span>Please fix the highlighted fields.</span></div>{% endif %}
+<form class="card" method="post" novalidate>
+  {{ csrf() }}
+  <div class="form-row">
+    {{ field('full_name', 'Full name', form, maxlength=100) }}
+    {{ field('employee_code', 'Employee ID', form, maxlength=20) }}
+  </div>
+  <div class="form-row">
+    {{ field('username', 'Username', form, maxlength=30) }}
+    {{ field('email', 'Email', form, type='email', maxlength=120) }}
+  </div>
+  {{ field('password', 'Password' ~ (' (leave blank to keep current)' if member else ''), form, type='password', required=not member, autocomplete='new-password', hint='At least 8 characters with a letter and a number.', maxlength=128) }}
+  <div class="form-row">
+    {{ field('department', 'Department', form, required=false, maxlength=80) }}
+    {{ field('phone', 'Phone', form, type='tel', required=false, maxlength=20) }}
+  </div>
+  <label class="check"><input type="checkbox" name="is_active" value="1" {{ 'checked' if form.values.get('is_active') }}> Account is active</label>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if member else 'Create account' }}</button>
+    <a class="btn btn-outline" href="{{ url_for('admin.staff_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

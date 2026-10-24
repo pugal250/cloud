@@ -1,0 +1,75 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro badge(status) %}
+{%- set icons = {'pending': 'hourglass-split', 'approved': 'check-circle-fill', 'rejected': 'x-circle-fill',
+                 'present': 'check-circle-fill', 'late': 'clock-history', 'absent': 'x-circle-fill', 'excused': 'info-circle-fill'} -%}
+<span class="badge badge-{{ status }}"><i class="bi bi-{{ icons.get(status, 'dot') }}" aria-hidden="true"></i> {{ status|capitalize }}</span>
+{% endmacro %}
+
+{% macro pct_chip(pct, threshold) %}
+{% if pct is none %}<span class="badge badge-muted">No data</span>
+{% elif pct < threshold %}<span class="badge badge-rejected"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> {{ pct|pct }} · Low</span>
+{% else %}<span class="badge badge-approved">{{ pct|pct }}</span>{% endif %}
+{% endmacro %}
+
+{% macro field(name, label, form, type='text', required=true, hint='', autocomplete='off') %}
+{% set err = form.errors.get(name) %}
+<div class="field{% if err %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="req" aria-hidden="true">*</span><span class="sr-only">(required)</span>{% endif %}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" {% if type != 'password' %}value="{{ form.values.get(name, '') if form.values.get(name) is not none else '' }}"{% endif %}
+    {% if required %}required{% endif %} autocomplete="{{ autocomplete }}"
+    {% if err %}aria-invalid="true"{% endif %}
+    {% if err or hint %}aria-describedby="{% if hint %}h-{{ name }} {% endif %}{% if err %}e-{{ name }}{% endif %}"{% endif %}
+    {% for k, v in kwargs.items() %}{{ k|replace('_', '-') }}="{{ v }}" {% endfor %}>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if err %}<p class="error" id="e-{{ name }}">{{ err }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label, form, required=true, hint='', rows=4, maxlength=500) %}
+{% set err = form.errors.get(name) %}
+<div class="field{% if err %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="req" aria-hidden="true">*</span><span class="sr-only">(required)</span>{% endif %}</label>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}" maxlength="{{ maxlength }}" {% if required %}required{% endif %}
+    {% if err %}aria-invalid="true"{% endif %}
+    {% if err or hint %}aria-describedby="{% if hint %}h-{{ name }} {% endif %}{% if err %}e-{{ name }}{% endif %}"{% endif %}>{{ form.values.get(name, '') }}</textarea>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if err %}<p class="error" id="e-{{ name }}">{{ err }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro select(name, label, form, options, required=false, blank='-- None --', hint='') %}
+{% set err = form.errors.get(name) %}
+<div class="field{% if err %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="req" aria-hidden="true">*</span><span class="sr-only">(required)</span>{% endif %}</label>
+  <select id="f-{{ name }}" name="{{ name }}" {% if required %}required{% endif %} {% if err %}aria-invalid="true" aria-describedby="e-{{ name }}"{% endif %}>
+    <option value="">{{ blank }}</option>
+    {% for value, text in options %}
+    <option value="{{ value }}" {% if form.values.get(name)|string == value|string %}selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+  </select>
+  {% if hint %}<p class="hint">{{ hint }}</p>{% endif %}
+  {% if err %}<p class="error" id="e-{{ name }}">{{ err }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro file_input(name, label, form, hint='PDF, PNG or JPG, up to 5 MB.') %}
+{% set err = form.errors.get(name) %}
+<div class="field{% if err %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }} <span class="req" aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+  <input id="f-{{ name }}" name="{{ name }}" type="file" required accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+    data-max-bytes="5242880" aria-describedby="h-{{ name }}{% if err %} e-{{ name }}{% endif %}" {% if err %}aria-invalid="true"{% endif %}>
+  <p class="hint" id="h-{{ name }}">{{ hint }}</p>
+  {% if err %}<p class="error" id="e-{{ name }}">{{ err }}</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro empty(icon, title, text='') %}
+<div class="empty"><i class="bi bi-{{ icon }}" aria-hidden="true"></i><p class="empty-title">{{ title }}</p>{% if text %}<p>{{ text }}</p>{% endif %}</div>
+{% endmacro %}
+
+{% macro review_info(item) %}
+{% if item.status != 'pending' %}
+<p class="review-note"><strong>{{ item.status|capitalize }}{% if item.reviewer_name %} by {{ item.reviewer_name }}{% endif %}{% if item.reviewed_at %} on {{ item.reviewed_at|d }}{% endif %}:</strong> {{ item.review_note or 'No note.' }}</p>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: student-management-system
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: flask --app sms seed-demo
+    startCommand: gunicorn "sms:create_app()"
+    healthCheckPath: /login
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: SMS_COOKIE_SECURE
+        value: "1"
+      - key: SMS_SECRET_KEY
+        generateValue: true
+      - key: SMS_DATABASE
+        value: /var/data/sms.sqlite3
+      - key: SMS_UPLOAD_FOLDER
+        value: /var/data/uploads
+    disk:
+      name: sms-data
+      mountPath: /var/data
+      sizeGB: 1

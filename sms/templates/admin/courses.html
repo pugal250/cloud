@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, empty %}
+{% block title %}Courses & settings{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Courses &amp; settings</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin.course_new') }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add course</a></div>
+
+<section class="card" aria-labelledby="th-h">
+  <div class="card-head"><h2 id="th-h">Attendance alert threshold</h2></div>
+  <p class="muted">Students whose attendance falls below this percentage appear in the low attendance alerts.</p>
+  <form method="post" action="{{ url_for('admin.update_threshold') }}" class="inline-form" novalidate>
+    {{ csrf() }}
+    {{ field('attendance_threshold', 'Threshold (%)', form, type='number', min='0', max='100', step='0.5') }}
+    <button class="btn btn-primary" type="submit">Save threshold</button>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="c-h">
+  <div class="card-head"><h2 id="c-h">Courses</h2></div>
+  {% if courses %}
+  <div class="table-wrap"><table>
+    <caption class="sr-only">Courses</caption>
+    <thead><tr><th scope="col">Code</th><th scope="col">Name</th><th scope="col">Description</th><th scope="col">Students</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody>{% for c in courses %}
+      <tr><td data-label="Code">{{ c.code }}</td><td data-label="Name">{{ c.name }}</td><td data-label="Description">{{ c.description or '-' }}</td><td data-label="Students">{{ c.student_count }}</td>
+        <td class="row-actions">
+          <a class="btn btn-sm btn-outline" href="{{ url_for('admin.course_edit', course_id=c.id) }}"><i class="bi bi-pencil-square" aria-hidden="true"></i> Edit<span class="sr-only"> {{ c.name }}</span></a>
+          <a class="btn btn-sm btn-danger-outline" href="{{ url_for('admin.course_delete', course_id=c.id) }}"><i class="bi bi-trash" aria-hidden="true"></i> Delete<span class="sr-only"> {{ c.name }}</span></a>
+        </td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{{ empty('journal-bookmark', 'No courses yet', 'Add a course so students can be enrolled.') }}{% endif %}
+</section>
+{% endblock %}

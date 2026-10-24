@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, field, textarea, select %}
+{% block title %}{{ 'Edit student' if student else 'Add student' }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ 'Edit ' ~ student.full_name if student else 'Add student' }}</h1></div>
+{% if form.errors %}<div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><span>Please fix the highlighted fields.</span></div>{% endif %}
+<form class="card" method="post" novalidate>
+  {{ csrf() }}
+  <h2>Account</h2>
+  <div class="form-row">
+    {{ field('full_name', 'Full name', form, maxlength=100, autocomplete='off') }}
+    {{ field('student_code', 'Student ID', form, maxlength=20) }}
+  </div>
+  <div class="form-row">
+    {{ field('username', 'Username', form, maxlength=30) }}
+    {{ field('email', 'Email', form, type='email', maxlength=120) }}
+  </div>
+  {{ field('password', 'Password' ~ (' (leave blank to keep current)' if student else ''), form, type='password', required=not student, autocomplete='new-password', hint='At least 8 characters with a letter and a number.', maxlength=128) }}
+  <label class="check"><input type="checkbox" name="is_active" value="1" {{ 'checked' if form.values.get('is_active') }}> Account is active</label>
+
+  <h2>Details</h2>
+  <div class="form-row">
+    {% set course_opts = [] %}{% for c in courses %}{% set _ = course_opts.append((c.id, c.code ~ ' – ' ~ c.name)) %}{% endfor %}
+    {% set staff_opts = [] %}{% for s in staff %}{% set _ = staff_opts.append((s.id, s.full_name)) %}{% endfor %}
+    {{ select('course_id', 'Course', form, course_opts) }}
+    {{ select('staff_id', 'Assigned staff', form, staff_opts) }}
+  </div>
+  <div class="form-row">
+    {{ field('phone', 'Phone', form, type='tel', required=false, maxlength=20) }}
+    {{ field('date_of_birth', 'Date of birth', form, type='date', required=false, max=today) }}
+  </div>
+  {{ textarea('address', 'Address', form, required=false, rows=2, maxlength=300) }}
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if student else 'Add student' }}</button>
+    <a class="btn btn-outline" href="{{ url_for('admin.student_view', student_id=student.id) if student else url_for('admin.students') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% macro body() %}
+<div class="error-page">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ title }}</h1>
+  <p>{{ detail }}</p>
+  <a class="btn btn-primary" href="{{ url_for('auth.index') }}">Go to my dashboard</a>
+</div>
+{% endmacro %}
+{% block content %}{{ body() }}{% endblock %}
+{% block bare %}<main id="main" class="login-main" tabindex="-1">{{ body() }}</main>{% endblock %}
