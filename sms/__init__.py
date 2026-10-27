@@ -47,25 +47,27 @@ def create_app(test_config=None):
     db.init_app(app)
     security.init_app(app)
 
-    # Create tables automatically (idempotent) so a missing `init-db` can never cause a 500.
+        # Create tables automatically.
     with app.app_context():
-    db.init_db()
+        db.init_db()
 
-    user_count = db.get_db().execute(
-        "SELECT COUNT(*) FROM users"
-    ).fetchone()[0]
+        connection = db.get_db()
+        user_count = connection.execute(
+            "SELECT COUNT(*) FROM users"
+        ).fetchone()[0]
 
-    if user_count == 0 and os.environ.get("SMS_AUTO_SEED_DEMO") == "1":
-        from .seed import seed_demo
+        if user_count == 0 and os.environ.get("SMS_AUTO_SEED_DEMO") == "1":
+            from .seed import seed_demo
 
-        if seed_demo(db.get_db()):
-            app.logger.info("Demo accounts created successfully.")
-    elif user_count == 0:
-        app.logger.warning(
-            "No users yet. Set SMS_AUTO_SEED_DEMO=1 to load demo accounts."
-        )
+            if seed_demo(connection):
+                app.logger.info("Demo accounts created successfully.")
+        elif user_count == 0:
+            app.logger.warning(
+                "No users yet. Set SMS_AUTO_SEED_DEMO=1 to load demo accounts."
+            )
 
-    db.close_db()
+        db.close_db()
+        
     for module in (auth, student, staff, admin, files):
         app.register_blueprint(module.bp)
     cli.register(app)
